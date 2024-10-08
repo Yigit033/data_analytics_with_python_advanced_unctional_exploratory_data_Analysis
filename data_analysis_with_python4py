@@ -1,0 +1,158 @@
+
+
+
+import numpy as np
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", 500)
+df = sns.load_dataset("titanic")
+
+
+
+for col in df.columns:
+    if df[col].dtypes == "bool":
+        df[col] = df[col].astype("object") 
+
+
+
+
+def cat_summary(dataframe, col_name):
+    print(pd.DataFrame({col_name: dataframe[col_name].value_counts(),"Ratio": 100 * dataframe[col_name].value_counts() /len(dataframe)}))
+    print("##########################################")
+
+
+
+def grab_col_names(dataframe, cat_th=10, car_th=20):
+    """
+    Veri setindeki katagorik, numerik ve kategorik fakat kardinal değişkenlerin isimlerini verir.
+    
+    
+    Parameters
+    ------
+    dataframe: dataframe
+    cat_th: int, float
+        numerik fakat katagorik olan değişkenler için sınıf eşik değeri
+    car_th: int, float
+        katagorik fakat kardinal olan değişkenler için sınıf eşik değeri
+
+    Returns
+    -------
+    cat_cols: list
+        Kategorik değişken listesi
+    num_cols: list
+        Numerik değişken listesi
+    cat_but_car: list
+        Kategorik görünümlü kardinal değişken listesi
+
+    Notes
+    -------
+    cat_cols + num_cols + cat_but_car = toplam değişken sayısı
+    num_but_cat cat_cols'un içersinde.
+    Retrun olan 3 liste toplamı toplam değişken sayısına eşittir: cat_cols + num_cols 
+
+
+
+
+
+    """
+
+
+
+    
+
+
+    cat_cols = [col for col in df.columns if str(df[col].dtypes) in ["object", "category", "bool"]]
+    num_but_cat = [col for col in df.columns if df[col].nunique() < 10 and df[col].dtypes in ["int", "float"]]
+    cat_but_car = [col for col in df.columns if df[col].nunique() > 20 and str(df[col].dtypes) in ["category", "object"]]
+
+    cat_cols = cat_cols + num_but_cat
+    cat_cols = [col for col in df.columns if col not in cat_but_car]
+
+
+    num_cols = [col for col in df.columns if df[col].dtypes in ["int", "float"]]
+    num_cols = [col for col in num_cols if col not in cat_cols]
+
+
+    print(f"Observations: {df.shape[0]}")
+    print(f"Variables: {df.shape[1]}")
+    print(f'cat_cols: {len(cat_cols)}')
+    print(f'num_cols: {len(num_cols)}')
+    print(f'cat_but_car: {len(cat_but_car)}')
+    print(f"num_but_cat: {len(num_but_cat)}")
+    print(cat_cols, num_cols, cat_but_car)
+
+
+    return cat_cols, num_cols, cat_but_car
+
+
+
+
+cat_cols, num_cols, cat_but_car = grab_col_names(df)
+
+
+
+print(df.head(10))
+
+
+
+"""print(df["survived"].value_counts())
+
+cat_summary(df, "survived")"""
+
+
+survived_by_sex = df.groupby("sex")["survived"].mean()
+
+"""print(survived_by_sex)
+"""
+
+## Buradan cinsiyetin hayatta kalmayı nasıl etkilediğini görebiliriz. Kadınların erkeklere göre daha fazla hayatta kaldığını görebiliriz.
+
+
+for col in cat_cols:
+    if col in cat_cols:
+        survived_by_sex_and_age = df.groupby(col)["survived"].mean()
+        print(survived_by_sex_and_age) 
+    
+
+
+def target_summary_with_cat(dataframe, target, categorical_col):
+    print(pd.DataFrame({"Target_Frame": dataframe.groupby(categorical_col)[target].mean()}))
+
+
+
+# target_summary_with_cat(df, "survived", input("Enter a catogorical colmun name:"))
+
+
+
+
+
+for col in cat_cols:
+    target_summary_with_cat(df, "survived", col)
+
+
+
+
+
+
+# head_df = df.head(10)
+
+# print(head_df)
+
+print(df.iloc[0:5, 1:4])
+
+
+
+
+
+
+
+
+
+
+
+
